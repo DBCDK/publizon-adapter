@@ -46,14 +46,6 @@ module.exports = async function (fastify, opts) {
     handler: async (request, reply) => {
       const { body, headers, method, query } = request;
       const path = request.params["*"];
-
-      console.log("############ Mock stack", JSON.stringify(mocked, null, 2));
-
-      console.log(
-        "############ Mock request",
-        JSON.stringify({ method, path, headers, body, query }, null, 2)
-      );
-
       // Look for any mocked requests that matches current request
       // method, path, headers, body, query should match
       const match = mocked.find((mock) =>

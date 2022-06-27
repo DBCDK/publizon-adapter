@@ -118,7 +118,7 @@ module.exports = async function (fastify, opts) {
 
         try {
           const cardNumber = authTokenRequired
-            ? configuration.user.uniqueId
+            ? configuration.user?.uniqueId || null
             : null;
 
           proxyResponse = await proxy.fetch({

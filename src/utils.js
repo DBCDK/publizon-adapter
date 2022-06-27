@@ -5,9 +5,6 @@ const fetch = require("node-fetch");
  * Adds some error handling as well as logging
  */
 async function fetcher(url, options, log) {
-
-  console.log("FFFFFFFFFFFFFetcher ", url, options)
-
   const start = process.hrtime();
   let res;
   try {

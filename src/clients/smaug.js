@@ -6,11 +6,11 @@ const { fetcher } = require("../utils");
 function validateSmaugUser({ configuration, log }) {
   // token must be user authenticated
   if (!configuration || !configuration.user || !configuration.user.uniqueId) {
-    log.info("Smaug configuration has invalid user");
-    throw {
-      code: 403,
-      body: { message: "user authenticated token is required" },
-    };
+    log.info("Smaug configuration is missing a user or uniqueId");
+    // throw {
+    //   code: 403,
+    //   body: { message: "user authenticated token is required" },
+    // };
   }
 }
 

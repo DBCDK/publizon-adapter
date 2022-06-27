@@ -180,11 +180,12 @@ describe("Testing the publizon adapter", () => {
   });
 
   context("Access authenticated path", () => {
-    it("Returns 403 when requesting a authenticated path with a anonymous token", () => {
+    it("Returns error from PubHub API when requesting a authenticated path with a anonymous token", () => {
       /**
        * Expected flow:
        * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
-       * 2. smaug configuration validation fails with 403
+       * 2. smaug configuration is succesfully validated
+       * 3. PubHub adapter returns error message for missing cardNumber in header
        */
 
       // Setup mocks
@@ -196,7 +197,7 @@ describe("Testing the publizon adapter", () => {
         },
       });
 
-      mockFetchPublizonAuthenticatedPathGetSucces();
+      mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces();
 
       // Send request to adapter
       cy.request({
@@ -208,7 +209,7 @@ describe("Testing the publizon adapter", () => {
       }).then((res) => {
         expect(res.status).to.eq(403);
         expect(res.body).to.deep.include({
-          message: "user authenticated token is required",
+          message: "Error from Publizon - missing cardNumber",
         });
       });
     });
@@ -336,23 +337,19 @@ function mockFetchPublizonAuthenticatedPathGetSucces() {
   });
 }
 
-function mockFetchUserinfoAuthenticatedTokenNoCPR() {
+function mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces() {
   mockHTTP({
     request: {
       method: "GET",
-      path: `/userinfo`,
+      path: "/publizon",
       headers: {
-        authorization: "Bearer TOKEN_WITH_NO_CPR",
+        clientid: "some-clientId",
+        licensekey: "some-licenseKey",
       },
     },
     response: {
-      status: 200,
-      body: {
-        attributes: {
-          userId: "some-userId",
-          pincode: "some-pincode",
-        },
-      },
+      status: 403,
+      body: { message: "Error from Publizon - missing cardNumber" },
     },
   });
 }
