@@ -1,0 +1,26 @@
+version: "3"
+services:
+  http_mock:
+    build: .
+    environment:
+      - FASTIFY_LOG_LEVEL=error
+      - FASTIFY_PRETTY_LOGS=false
+    volumes:
+      - "./src:/home/node/app/src"
+    command: bash -c "npx fastify-cli start src/httpmock.js --watch"
+    ports:
+      - "3333:3000"
+  adapter:
+    build: .
+    environment:
+      - FASTIFY_LOG_LEVEL=silent
+      - FASTIFY_PRETTY_LOGS=false
+      - SMAUG_URL=http://http_mock:3000/smaug/configuration
+      - PUBLIZON_URL=http://http_mock:3000/publizon
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./src:/home/node/app/src"
+    depends_on:
+      - http_mock
+    command: bash -c "npx fastify-cli start src/server.js --watch"
