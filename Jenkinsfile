@@ -9,11 +9,14 @@ pipeline {
         label 'devel10-head'
     }
     environment {
-        GITLAB_ID = "1048"
+        GITLAB_ID = "1259"
         DOCKER_TAG = "${imageLabel}"
         IMAGE = "${imageName}${env.BRANCH_NAME != 'main' ? "-${env.BRANCH_NAME.toLowerCase()}" : ''}:${imageLabel}"
         DOCKER_COMPOSE_NAME = "compose-${IMAGE}"
         GITLAB_PRIVATE_TOKEN = credentials('metascrum-gitlab-api-token')
+    }
+    triggers{
+        githubPush()
     }
     stages {
         stage('Build image') {

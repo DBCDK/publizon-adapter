@@ -14,6 +14,7 @@
   "author": "Frontend @ DBC",
   "license": "GPL-3.0-only",
   "dependencies": {
+    "@fastify/cors": "^7.0.0",
     "dbc-node-logger": "^2.0.9",
     "fastify": "^3.18.0",
     "fastify-cli": "^2.13.0",

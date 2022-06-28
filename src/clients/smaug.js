@@ -50,6 +50,8 @@ function init({ log }) {
       log
     );
 
+    console.log("######### url", `${process.env.SMAUG_URL}?token=${token}`);
+
     switch (res.code) {
       case 200:
         const configuration = res.body;
@@ -69,7 +71,7 @@ function init({ log }) {
         );
         throw {
           code: 500,
-          body: { message: "internal server error" },
+          body: { message: "internal server error 1" },
         };
     }
   }

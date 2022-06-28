@@ -17,6 +17,7 @@ services:
       - FASTIFY_PRETTY_LOGS=false
       - SMAUG_URL=http://http_mock:3000/smaug/configuration
       - PUBLIZON_URL=http://http_mock:3000/publizon
+      - CORS_ORIGIN=all
     ports:
       - "3000:3000"
     volumes:

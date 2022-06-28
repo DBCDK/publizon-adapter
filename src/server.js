@@ -3,6 +3,8 @@
 const { log } = require("dbc-node-logger");
 const { v4: uuidv4 } = require("uuid");
 
+const fastifyCORS = require("@fastify/cors");
+
 const initSmaug = require("./clients/smaug");
 const initProxy = require("./clients/proxy");
 
@@ -19,6 +21,21 @@ const schema = {
     required: ["Authorization"],
   },
 };
+
+// cors settings
+const corsOptions = {
+  origin: parseCorsOrigin(),
+  methods: "GET,PUT,POST,DELETE,OPTIONS,HEAD",
+};
+
+function parseCorsOrigin() {
+  const originValue = `${process.env.CORS_ORIGIN}`;
+  if (originValue === "all") {
+    return "*";
+  } else {
+    return originValue;
+  }
+}
 
 // list of requests which requires cardNumber to be attached
 const authRequestList = [
@@ -48,6 +65,9 @@ module.exports = async function (fastify, opts) {
   // Prepare for 'decorateRequest' and 'timings' properties to be set on request object
   fastify.decorateRequest("requestLogger", null);
   fastify.decorateRequest("timings", null);
+
+  // Cors options (Enable cors)
+  fastify.register(fastifyCORS, corsOptions);
 
   fastify.addHook("onRequest", (request, reply, done) => {
     // Create request logger and generate uuid (reqId) to be attached

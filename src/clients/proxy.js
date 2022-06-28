@@ -19,15 +19,9 @@ function init({ url, method, headers, body, log }) {
       },
     };
 
-    console.log("########## Cardnumber", cardNumber);
-
     if (cardNumber) {
-      console.log("########## here????????");
-
       options.headers.cardNumber = cardNumber;
     }
-
-    console.log("########## options.headers", options.headers);
 
     if (process.env.HTTPS_PROXY) {
       options.agent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
@@ -41,8 +35,6 @@ function init({ url, method, headers, body, log }) {
     }
 
     let res = await fetcher(process.env.PUBLIZON_URL, options, log);
-
-    console.log("############# res", res);
 
     switch (res.code) {
       case 401:
