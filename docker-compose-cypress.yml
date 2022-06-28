@@ -5,7 +5,7 @@ services:
     environment:
       - FASTIFY_LOG_LEVEL=info
       - FASTIFY_PRETTY_LOGS=false
-    command: bash -c "npx fastify-cli start src/httpmock.js --watch"
+    command: bash -c "npx fastify start src/httpmock.js --watch"
   adapter:
     image: "${IMAGE}"
     environment:
