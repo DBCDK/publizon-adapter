@@ -17,6 +17,10 @@ services:
       - FASTIFY_PRETTY_LOGS=false
       - SMAUG_URL=http://http_mock:3000/smaug/configuration
       - PUBLIZON_URL=http://http_mock:3000/publizon
+      - USERINFO_URL=http://http_mock:3000/userinfo
+      - AUTH_URL=http://http_mock:3000/auth
+      - CLIENT_ID=some-client-id
+      - CLIENT_SECRET=some-client-secret
       - CORS_ORIGIN=all
     ports:
       - "3000:3000"

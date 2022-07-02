@@ -7,6 +7,8 @@
 
 const isMatch = require("lodash/isMatch");
 
+const formbody = require("@fastify/formbody");
+
 let mocked = [];
 
 module.exports = async function (fastify, opts) {
@@ -25,6 +27,9 @@ module.exports = async function (fastify, opts) {
       }
     }
   );
+
+  // Allows the "application/x-www-form-urlencoded" content-type header
+  fastify.register(formbody);
 
   // Mock HTTP request
   fastify.post("/", async (request) => {
@@ -48,9 +53,20 @@ module.exports = async function (fastify, opts) {
       const path = request.params["*"];
       // Look for any mocked requests that matches current request
       // method, path, headers, body, query should match
-      const match = mocked.find((mock) =>
-        isMatch({ method, path, headers, body, query }, mock.request)
-      );
+
+      console.log("########## 1", {
+        method,
+        path,
+        headers,
+        body,
+        query,
+      });
+
+      const match = mocked.find((mock) => {
+        console.log("########## 2", mock.request);
+
+        return isMatch({ method, path, headers, body, query }, mock.request);
+      });
 
       if (match) {
         return reply.code(match.response.status).send(match.response.body);

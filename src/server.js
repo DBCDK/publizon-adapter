@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const fastifyCORS = require("@fastify/cors");
 
 const initSmaug = require("./clients/smaug");
+const initUserinfo = require("./clients/userinfo");
 const initProxy = require("./clients/proxy");
 
 const initLogger = require("./logger");
@@ -114,6 +115,8 @@ module.exports = async function (fastify, opts) {
 
         const smaug = initSmaug({ log: requestLogger });
 
+        const userinfo = initUserinfo({ log: requestLogger });
+
         const proxy = initProxy({
           url: request.url,
           method: request.method,
@@ -130,8 +133,32 @@ module.exports = async function (fastify, opts) {
           (obj) => obj.method === request.method && obj.url === request.url
         );
 
+        console.log("########### authTokenRequired", authTokenRequired);
+
         // The smaug configuration, fetched and validated
-        const configuration = await smaug.fetch({ token, authTokenRequired });
+        const configuration = await smaug.fetchConfiguration({
+          token,
+          authTokenRequired,
+        });
+
+        console.log("########### configuration", configuration);
+
+        const isAuthToken = !!configuration.user?.uniqueId;
+
+        let municipalityAgencyId = null;
+        if (isAuthToken) {
+          // get municipalityAgencyId from /userinfo
+          municipalityAgencyId = await userinfo.fetch({ token });
+        }
+
+        const agencyId = municipalityAgencyId || configuration.agencyId;
+
+        console.log("########### agencyId", agencyId);
+
+        // The smaug configuration, fetched and validated
+        const credentials = await smaug.fetchCredentials({ agencyId });
+
+        console.log("################### credentials", credentials);
 
         // Holds the proxy response
         let proxyResponse;
@@ -142,7 +169,7 @@ module.exports = async function (fastify, opts) {
             : null;
 
           proxyResponse = await proxy.fetch({
-            ...configuration.pub,
+            ...credentials,
             cardNumber,
           });
         } catch (e) {
