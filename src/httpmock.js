@@ -39,7 +39,7 @@ module.exports = async function (fastify, opts) {
   });
 
   // Reset Mocked requests
-  fastify.post("/reset", async () => {
+  fastify.post("/reset", () => {
     mocked = [];
     return "ok";
   });
@@ -53,18 +53,7 @@ module.exports = async function (fastify, opts) {
       const path = request.params["*"];
       // Look for any mocked requests that matches current request
       // method, path, headers, body, query should match
-
-      console.log("########## 1", {
-        method,
-        path,
-        headers,
-        body,
-        query,
-      });
-
       const match = mocked.find((mock) => {
-        console.log("########## 2", mock.request);
-
         return isMatch({ method, path, headers, body, query }, mock.request);
       });
 

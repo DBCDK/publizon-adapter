@@ -129,8 +129,10 @@ describe("Testing the publizon adapter", () => {
         });
       });
     });
+  });
 
-    it.only("returns error when configuration has invalid publizon credentials", () => {
+  context("Accessing publizon credentials", () => {
+    it("returns error when configuration has invalid publizon credentials", () => {
       /**
        * Expected flow:
        * 1. Adapter uses token to fetch smaug configuration
@@ -146,6 +148,7 @@ describe("Testing the publizon adapter", () => {
         },
       });
 
+      // Credentials smaug configuration mocks
       mockSmaug({
         token: "TOKEN_WITHOUT_PUBLIZON_CREDENTIALS",
         status: 200,
@@ -169,6 +172,9 @@ describe("Testing the publizon adapter", () => {
         "TOKEN_WITHOUT_PUBLIZON_CLIENTID",
         "TOKEN_WITHOUT_PUBLIZON_LICENSEKEY",
       ].forEach((token) => {
+        // get anonymous token
+        mockFetchAuthSucces({ token });
+
         cy.request({
           url: `/v1/some/path`,
           headers: {
@@ -186,8 +192,8 @@ describe("Testing the publizon adapter", () => {
     });
   });
 
-  context("Accessing publizon credentials", () => {
-    it("Fetch credentials for anonymous token (credentials by agencyId)", () => {
+  context("Accessing publizon credentials on anonymous path", () => {
+    it("GET: Fetch credentials for anonymous token (credentials by agencyId)", () => {
       /**
        * Expected flow:
        * 1. Adapter uses token to fetch smaug configuration, but token is invalid
@@ -202,49 +208,7 @@ describe("Testing the publizon adapter", () => {
         },
       });
 
-      mockFetchAuthSucces();
-      mockFetchPublizonAnonymousPathGetSucces();
-
-      mockSmaug({
-        token: "SOME_ANONYMOUS_TOKEN",
-        status: 200,
-        body: validSmaugCredentialsList,
-      });
-
-      // Send request to adapter
-      cy.request({
-        url: "/v1/some/path",
-        headers: {
-          Authorization: "Bearer VALID_TOKEN",
-        },
-        failOnStatusCode: false,
-      }).then((res) => {
-        expect(res.status).to.eq(200);
-        expect(res.body).to.deep.include({
-          message: "Hello from Publizon",
-        });
-      });
-    });
-  });
-
-  context("Access anonymous path", () => {
-    it.skip("returns publizon response, when token has valid credentials - GET request", () => {
-      /**
-       * Expected flow:
-       * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
-       * 2. smaug configuration is succesfully validated
-       * 3. The request is then forwarded to Publizon with succes
-       */
-
-      // Setup mocks
-      mockSmaug({
-        token: "VALID_TOKEN",
-        status: 200,
-        body: {
-          pub: validSmaugPublizonCredentials,
-        },
-      });
-
+      mockFetchCredentials();
       mockFetchPublizonAnonymousPathGetSucces();
 
       // Send request to adapter
@@ -262,12 +226,10 @@ describe("Testing the publizon adapter", () => {
       });
     });
 
-    it.skip("Returns publizon response, when token has valid credentials - POST request", () => {
+    it("POST: Fetch credentials for anonymous token (credentials by agencyId)", () => {
       /**
        * Expected flow:
-       * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
-       * 2. smaug configuration is succesfully validated
-       * 3. The request is then forwarded to Publizon with succes
+       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
        */
 
       // Setup mocks
@@ -275,10 +237,11 @@ describe("Testing the publizon adapter", () => {
         token: "VALID_TOKEN",
         status: 200,
         body: {
-          pub: validSmaugPublizonCredentials,
+          ...validSmaugConfiguration,
         },
       });
 
+      mockFetchCredentials();
       mockFetchPublizonAnonymousPathPostSucces();
 
       // Send request to adapter
@@ -298,8 +261,8 @@ describe("Testing the publizon adapter", () => {
     });
   });
 
-  context("Access authenticated path", () => {
-    it.skip("Fail when token has no MunicipalityAgencyId configured on token client", () => {
+  context("Accessing publizon credentials on authenticated path", () => {
+    it("Fail when token has no 'municipalityAgencyId' configured on token client", () => {
       /**
        * Expected flow:
        * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
@@ -312,7 +275,7 @@ describe("Testing the publizon adapter", () => {
         status: 200,
         body: {
           user: validSmaugUser,
-          fbs: validSmaugFbsCredentials,
+          ...validSmaugConfiguration,
         },
       });
 
@@ -321,7 +284,7 @@ describe("Testing the publizon adapter", () => {
       // Send request to adapter
       cy.request({
         method: "POST",
-        url: "/v1/some/cardnumber/required/path",
+        url: "/v1/some/authenticated/path",
         headers: {
           Authorization: "Bearer AUTHENTICATED_TOKEN",
         },
@@ -329,17 +292,17 @@ describe("Testing the publizon adapter", () => {
       }).then((res) => {
         expect(res.status).to.eq(403);
         expect(res.body).to.deep.include({
-          message: "token does not include a cpr",
+          message: "token client does not include a municipalityAgencyId",
         });
       });
     });
 
-    it.skip("Returns error from PubHub API when requesting a authenticated path with a anonymous token", () => {
+    it("Allow requesting PubHub authenticated path with a anonymous token", () => {
       /**
        * Expected flow:
        * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
        * 2. smaug configuration is succesfully validated
-       * 3. PubHub adapter returns error message for missing cardNumber in header
+       * 3. PubHub adapter will return an error message for missing cardNumber in header
        */
 
       // Setup mocks
@@ -347,15 +310,17 @@ describe("Testing the publizon adapter", () => {
         token: "ANONYMOUS_TOKEN",
         status: 200,
         body: {
-          pub: validSmaugPublizonCredentials,
+          ...validSmaugConfiguration,
         },
       });
+
+      mockFetchCredentials();
 
       mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces();
 
       // Send request to adapter
       cy.request({
-        url: "/v1/some/cardnumber/required/path",
+        url: "/v1/some/authenticated/path",
         headers: {
           Authorization: "Bearer ANONYMOUS_TOKEN",
         },
@@ -363,36 +328,78 @@ describe("Testing the publizon adapter", () => {
       }).then((res) => {
         expect(res.status).to.eq(403);
         expect(res.body).to.deep.include({
-          message: "Error from Publizon - missing cardNumber",
+          message: "Some error from Pubub for missing cardNumber",
         });
       });
     });
 
-    it.skip("Returns publizon response including cardNumber, with authenticated token and path", () => {
+    it("GET: Fetch credentials for authenticated token (credentials by municipalityAgencyId)", () => {
       /**
        * Expected flow:
-       * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
-       * 2. smaug configuration is succesfully validated
-       * 3. The request is then forwarded to Publizon with succes
+       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
        */
 
       // Setup mocks
       mockSmaug({
-        token: "VALID_AUTHENTICATED_TOKEN",
+        token: "AUTHENTICATED_TOKEN",
         status: 200,
         body: {
-          pub: validSmaugPublizonCredentials,
+          ...validSmaugConfiguration,
           user: validSmaugUser,
         },
       });
 
+      mockFetchUserinfoSucces();
+      mockFetchCredentials();
       mockFetchPublizonAuthenticatedPathGetSucces();
 
       // Send request to adapter
       cy.request({
-        url: "/v1/some/cardnumber/required/path",
+        url: "/v1/some/authenticated/path",
         headers: {
-          Authorization: "Bearer VALID_AUTHENTICATED_TOKEN",
+          Authorization: "Bearer AUTHENTICATED_TOKEN",
+        },
+        failOnStatusCode: false,
+      }).then((res) => {
+        expect(res.status).to.eq(200);
+        expect(res.body).to.deep.include({
+          message: "Hello from Publizon",
+        });
+      });
+    });
+
+    it("POST: Fetch credentials for authenticated token (credentials by municipalityAgencyId)", () => {
+      /**
+       * Expected flow:
+       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+       */
+
+      // Setup mocks
+      mockSmaug({
+        token: "AUTHENTICATED_TOKEN",
+        status: 200,
+        body: {
+          ...validSmaugConfiguration,
+          user: validSmaugUser,
+        },
+      });
+
+      mockFetchUserinfoSucces();
+      mockFetchCredentials();
+      mockFetchPublizonAuthenticatedPathPOSTSucces();
+
+      mockSmaug({
+        token: "SOME_ANONYMOUS_TOKEN",
+        status: 200,
+        body: validSmaugCredentialsList,
+      });
+
+      // Send request to adapter
+      cy.request({
+        method: "POST",
+        url: "/v1/some/authenticated/path",
+        headers: {
+          Authorization: "Bearer AUTHENTICATED_TOKEN",
         },
         failOnStatusCode: false,
       }).then((res) => {
@@ -440,7 +447,22 @@ function mockSmaug({ token, status, body }) {
   });
 }
 
-function mockFetchAuthSucces() {
+function mockFetchCredentials({ token } = {}) {
+  if (!token) {
+    token = "SOME_ANONYMOUS_TOKEN";
+  }
+  // get Anonymous token from smaug auth
+  mockFetchAuthSucces({ token });
+
+  // add credentialsList to smaug
+  mockSmaug({
+    token,
+    status: 200,
+    body: validSmaugCredentialsList,
+  });
+}
+
+function mockFetchAuthSucces({ token = "SOME_ANONYMOUS_TOKEN" }) {
   mockHTTP({
     request: {
       method: "POST",
@@ -460,7 +482,7 @@ function mockFetchAuthSucces() {
     response: {
       status: 200,
       body: {
-        access_token: "SOME_ANONYMOUS_TOKEN",
+        access_token: token,
         token_type: "Bearer",
         expires_in: 2591999,
       },
@@ -557,6 +579,24 @@ function mockFetchPublizonAuthenticatedPathGetSucces() {
   });
 }
 
+function mockFetchPublizonAuthenticatedPathPOSTSucces() {
+  mockHTTP({
+    request: {
+      method: "POST",
+      path: "/publizon",
+      headers: {
+        clientid: "some-clientId",
+        licensekey: "some-licenseKey",
+        cardnumber: "some-uniqueId",
+      },
+    },
+    response: {
+      status: 200,
+      body: { message: "Hello from Publizon" },
+    },
+  });
+}
+
 function mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces() {
   mockHTTP({
     request: {
@@ -569,7 +609,7 @@ function mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces() {
     },
     response: {
       status: 403,
-      body: { message: "Error from Publizon - missing cardNumber" },
+      body: { message: "Some error from Pubub for missing cardNumber" },
     },
   });
 }

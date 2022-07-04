@@ -52,7 +52,8 @@ const authRequestList = [
   { method: "DELETE", url: "/v1/user/checklist/" },
   { method: "GET", url: "/v1/user/cardnumber/friendly" },
   // for test only
-  { method: "GET", url: "/v1/some/cardnumber/required/path" },
+  { method: "GET", url: "/v1/some/authenticated/path" },
+  { method: "POST", url: "/v1/some/authenticated/path" },
 ];
 
 /**
@@ -133,15 +134,11 @@ module.exports = async function (fastify, opts) {
           (obj) => obj.method === request.method && obj.url === request.url
         );
 
-        console.log("########### authTokenRequired", authTokenRequired);
-
         // The smaug configuration, fetched and validated
         const configuration = await smaug.fetchConfiguration({
           token,
           authTokenRequired,
         });
-
-        console.log("########### configuration", configuration);
 
         const isAuthToken = !!configuration.user?.uniqueId;
 
@@ -153,12 +150,8 @@ module.exports = async function (fastify, opts) {
 
         const agencyId = municipalityAgencyId || configuration.agencyId;
 
-        console.log("########### agencyId", agencyId);
-
         // The smaug configuration, fetched and validated
         const credentials = await smaug.fetchCredentials({ agencyId });
-
-        console.log("################### credentials", credentials);
 
         // Holds the proxy response
         let proxyResponse;

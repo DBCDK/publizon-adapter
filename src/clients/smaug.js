@@ -71,21 +71,13 @@ function init({ log }) {
     );
 
     switch (res.code) {
-      case 200:
-        return res;
       case 404:
         throw {
           code: 403,
           body: { message: "invalid token" },
         };
       default:
-        log.error(
-          `Smaug request failed for token=${token}. This is unexpected.`
-        );
-        throw {
-          code: 500,
-          body: { message: "internal server error" },
-        };
+        return res;
     }
   }
 
@@ -110,35 +102,59 @@ function init({ log }) {
     switch (res.code) {
       case 200:
         return res.body.access_token;
-      default:
+
+      case 400:
         log.info(`Failed to fetch token for client '${clientId}'`);
         throw {
           code: 400,
           body: { message: "Failed to fetch token for client '${clientId}'" },
         };
+      default:
+        log.error(
+          `Smaug request failed for token=${token}. This is unexpected.`
+        );
+        throw {
+          code: 500,
+          body: { message: "internal server error" },
+        };
     }
   }
 
   async function fetchCredentials({ agencyId, retry = false }) {
-    if (!ANONYMOUS_TOKEN && !retry) {
+    if (!ANONYMOUS_TOKEN || retry) {
       // fetch a token to access credentials
       ANONYMOUS_TOKEN = await fetchToken();
     }
 
     const res = await fetch({ token: ANONYMOUS_TOKEN });
 
-    const credentials = res.body.publizon?.[agencyId];
+    switch (res.code) {
+      case 200:
+        const credentials = res.body.publizon?.[agencyId];
 
-    // ensure configuration has an agencyId configured
-    validateSmaugCredentials({ credentials, log });
+        // ensure configuration has an agencyId configured
+        validateSmaugCredentials({ credentials, log });
 
-    return credentials;
+        return credentials;
+
+      default:
+        if (!retry) {
+          // retry if global/stored token is expired/invalid
+          // this will trigger a new fresh token fetch
+          return await fetchCredentials({ agencyId, retry: true });
+        }
+        log.error(
+          `Smaug request failed for token=${token}. This is unexpected.`
+        );
+        throw {
+          code: 500,
+          body: { message: "internal server error" },
+        };
+    }
   }
 
   async function fetchConfiguration({ token, authTokenRequired }) {
     const res = await fetch({ token });
-
-    console.log("############## res", res);
 
     const configuration = res.body;
 
