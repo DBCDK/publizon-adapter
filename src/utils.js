@@ -1,4 +1,5 @@
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
+const fetch = require("isomorphic-unfetch");
 
 /**
  * Wraps fetch API

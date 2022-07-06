@@ -143,7 +143,7 @@ module.exports = async function (fastify, opts) {
         const isAuthToken = !!configuration.user?.uniqueId;
 
         let municipalityAgencyId = null;
-        if (isAuthToken) {
+        if (isAuthToken && authTokenRequired) {
           // get municipalityAgencyId from /userinfo
           municipalityAgencyId = await userinfo.fetch({ token });
         }
@@ -162,7 +162,7 @@ module.exports = async function (fastify, opts) {
             : null;
 
           proxyResponse = await proxy.fetch({
-            ...credentials,
+            licenseKey: credentials.licenseKey,
             cardNumber,
           });
         } catch (e) {
@@ -191,5 +191,10 @@ module.exports = async function (fastify, opts) {
           );
       }
     },
+  });
+
+  fastify.addHook("onResponse", (request, reply, done) => {
+    // Some code
+    done();
   });
 };

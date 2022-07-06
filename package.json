@@ -21,7 +21,9 @@
     "fastify-cli": "^2.13.0",
     "https-proxy-agent": "^5.0.0",
     "ioredis": "^4.27.6",
+    "isomorphic-unfetch": "^3.1.0",
     "lodash": "^4.17.21",
+    "md5": "^2.3.0",
     "node-fetch": "^2.6.1",
     "uuid": "^8.3.2"
   }

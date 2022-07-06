@@ -42,15 +42,14 @@ function validateSmaugConfiguration({ configuration, log }) {
  * Checks that configuration contains publizon credentials
  */
 function validateSmaugCredentials({ credentials, log }) {
-  const isValid = credentials?.clientId && credentials?.licenseKey;
+  const isValid = credentials?.licenseKey;
 
   if (!isValid) {
     log.info("Smaug configuration has invalid Publizon credentials");
     throw {
       code: 403,
       body: {
-        message:
-          "token must have publizon credentials with 'clientId' and 'licenseKey'",
+        message: "token must have publizon credentials with 'licenseKey'",
       },
     };
   }
@@ -107,7 +106,7 @@ function init({ log }) {
         log.info(`Failed to fetch token for client '${clientId}'`);
         throw {
           code: 400,
-          body: { message: "Failed to fetch token for client '${clientId}'" },
+          body: { message: `Failed to fetch token for client '${clientId}'` },
         };
       default:
         log.error(
@@ -130,7 +129,7 @@ function init({ log }) {
 
     switch (res.code) {
       case 200:
-        const credentials = res.body.publizon?.[agencyId];
+        const credentials = res.body.publizon?.credentials?.[agencyId];
 
         // ensure configuration has an agencyId configured
         validateSmaugCredentials({ credentials, log });

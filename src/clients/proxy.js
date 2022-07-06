@@ -1,5 +1,7 @@
 const HttpsProxyAgent = require("https-proxy-agent");
 
+const md5 = require("md5");
+
 const { fetcher } = require("../utils");
 
 /**
@@ -9,13 +11,15 @@ function init({ url, method, headers, body, log }) {
   /**
    * The actual fetch function
    */
-  async function fetch({ clientId, licenseKey, cardNumber }) {
+  async function fetch({ licenseKey, cardNumber }) {
+    const clientId = process.env.PUBLIZON_CLIENT_ID;
+
     const options = {
       method: method,
       headers: {
         ...headers,
         clientId,
-        licenseKey,
+        licenseKey: md5(licenseKey),
       },
     };
 
@@ -34,7 +38,7 @@ function init({ url, method, headers, body, log }) {
       options.body = typeof body === "object" ? JSON.stringify(body) : body;
     }
 
-    let res = await fetcher(process.env.PUBLIZON_URL, options, log);
+    let res = await fetcher(process.env.PUBLIZON_URL + url, options, log);
 
     switch (res.code) {
       case 401:

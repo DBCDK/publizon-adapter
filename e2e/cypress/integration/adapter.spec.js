@@ -6,8 +6,8 @@ const validSmaugUser = {
   uniqueId: "some-uniqueId",
 };
 
-const validSmaugPublizonCredentials = {
-  clientId: "some-clientId",
+const validPublizonCredentials = {
+  retailerId: "some-retialerId",
   licenseKey: "some-licenseKey",
 };
 
@@ -17,11 +17,16 @@ const validSmaugConfiguration = {
 };
 
 const validSmaugCredentialsList = {
+  "000001": validPublizonCredentials,
+  "000002": validPublizonCredentials,
+  "000003": validPublizonCredentials,
+  "000004": validPublizonCredentials,
+};
+
+const validSmaugPublizonCredentials = {
   publizon: {
-    "000001": validSmaugPublizonCredentials,
-    "000002": validSmaugPublizonCredentials,
-    "000003": validSmaugPublizonCredentials,
-    "000004": validSmaugPublizonCredentials,
+    clientId: "some-clientId",
+    credentials: validSmaugCredentialsList,
   },
 };
 
@@ -184,8 +189,7 @@ describe("Testing the publizon adapter", () => {
         }).then((res) => {
           expect(res.status).to.eq(403);
           expect(res.body).to.deep.include({
-            message:
-              "token must have publizon credentials with 'clientId' and 'licenseKey'",
+            message: "token must have publizon credentials with 'licenseKey'",
           });
         });
       });
@@ -391,7 +395,7 @@ describe("Testing the publizon adapter", () => {
       mockSmaug({
         token: "SOME_ANONYMOUS_TOKEN",
         status: 200,
-        body: validSmaugCredentialsList,
+        body: validSmaugPublizonCredentials,
       });
 
       // Send request to adapter
@@ -458,7 +462,7 @@ function mockFetchCredentials({ token } = {}) {
   mockSmaug({
     token,
     status: 200,
-    body: validSmaugCredentialsList,
+    body: validSmaugPublizonCredentials,
   });
 }
 
@@ -470,7 +474,6 @@ function mockFetchAuthSucces({ token = "SOME_ANONYMOUS_TOKEN" }) {
       headers: {
         "content-type": "application/x-www-form-urlencoded",
       },
-      // body: `grant_type=password&username=@&password=@&client_id=some-client-id&client_secret=some-client-secret`,
       body: {
         grant_type: "password",
         username: "@",
@@ -532,10 +535,11 @@ function mockFetchPublizonAnonymousPathGetSucces() {
   mockHTTP({
     request: {
       method: "GET",
-      path: "/publizon",
+      path: "/publizon/v1/some/path",
       headers: {
         clientid: "some-clientId",
-        licensekey: "some-licenseKey",
+        // licensekey: "some-licenseKey",
+        licensekey: "d4383a9fa7214a6d78a019c1328695a3",
       },
     },
     response: {
@@ -548,10 +552,11 @@ function mockFetchPublizonAnonymousPathPostSucces() {
   mockHTTP({
     request: {
       method: "POST",
-      path: "/publizon",
+      path: "/publizon/v1/some/path",
       headers: {
         clientid: "some-clientId",
-        licensekey: "some-licenseKey",
+        // licensekey: "some-licenseKey",
+        licensekey: "d4383a9fa7214a6d78a019c1328695a3",
       },
     },
     response: {
@@ -565,10 +570,11 @@ function mockFetchPublizonAuthenticatedPathGetSucces() {
   mockHTTP({
     request: {
       method: "GET",
-      path: "/publizon",
+      path: "/publizon/v1/some/authenticated/path",
       headers: {
         clientid: "some-clientId",
-        licensekey: "some-licenseKey",
+        // licensekey: "some-licenseKey",
+        licensekey: "d4383a9fa7214a6d78a019c1328695a3",
         cardnumber: "some-uniqueId",
       },
     },
@@ -583,10 +589,11 @@ function mockFetchPublizonAuthenticatedPathPOSTSucces() {
   mockHTTP({
     request: {
       method: "POST",
-      path: "/publizon",
+      path: "/publizon/v1/some/authenticated/path",
       headers: {
         clientid: "some-clientId",
-        licensekey: "some-licenseKey",
+        // licensekey: "some-licenseKey",
+        licensekey: "d4383a9fa7214a6d78a019c1328695a3",
         cardnumber: "some-uniqueId",
       },
     },
@@ -601,10 +608,11 @@ function mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces() {
   mockHTTP({
     request: {
       method: "GET",
-      path: "/publizon",
+      path: "/publizon/v1/some/authenticated/path",
       headers: {
         clientid: "some-clientId",
-        licensekey: "some-licenseKey",
+        // licensekey: "some-licenseKey",
+        licensekey: "d4383a9fa7214a6d78a019c1328695a3",
       },
     },
     response: {
