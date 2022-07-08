@@ -23,7 +23,7 @@ services:
       - USERINFO_URL=http://http_mock:3000/userinfo
 
       # - PUBLIZON_URL=https://library-api.qa.pubhub.dk
-      # - PUBLIZON_CLIENT_ID=2F5FC38C-C9B0-4AA6-9987-F4A8B34B7D1C
+      # - PUBLIZON_CLIENT_ID=${PUBLIZON_CLIENT_ID}
       # - SMAUG_URL=https://auth-config.dbc.dk/configuration
       # - USERINFO_URL=https://login.bib.dk/userinfo
 
