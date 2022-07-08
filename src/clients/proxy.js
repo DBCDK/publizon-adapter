@@ -12,6 +12,7 @@ function init({ url, method, headers, body, log }) {
    * The actual fetch function
    */
   async function fetch({ licenseKey, cardNumber }) {
+    const time = Date.now();
     const clientId = process.env.PUBLIZON_CLIENT_ID;
 
     const options = {
@@ -39,6 +40,12 @@ function init({ url, method, headers, body, log }) {
     }
 
     let res = await fetcher(process.env.PUBLIZON_URL + url, options, log);
+
+    // log response to summary
+    log.summary.datasources.pubhub = {
+      code: res.code,
+      time: Date.now() - time,
+    };
 
     switch (res.code) {
       case 401:

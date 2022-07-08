@@ -76,11 +76,17 @@ module.exports = async function (fastify, opts) {
     // to every log line during this request
     request.requestLogger = appLogger.child({ reqId: uuidv4() });
 
-    request.requestLogger.info("onRequest", {
+    // summary
+    request.requestLogger.summary = {
+      datasources: {},
+      total_ms: Date.now(),
+    };
+
+    request.requestLogger.debug("onRequest", {
       requestObj: {
         method: request.method,
         url: request.url,
-        headers: request.headers,
+        headers: JSON.stringify(request.headers),
         hostname: request.hostname,
         remoteAddress: request.ip,
         remotePort: request.connection.remotePort,
@@ -89,14 +95,6 @@ module.exports = async function (fastify, opts) {
 
     request.timings = { start: process.hrtime() };
 
-    done();
-  });
-
-  fastify.addHook("onResponse", (request, reply, done) => {
-    request.requestLogger.info("onResponse", {
-      response: { status: reply.statusCode },
-      timings: { ms: nanoToMs(process.hrtime(request.timings.start)[1]) },
-    });
     done();
   });
 
@@ -130,23 +128,36 @@ module.exports = async function (fastify, opts) {
         const token = request.headers.authorization.replace(/bearer /i, "");
 
         // Check if request requires a authenticated token by matching request url and method
-        const authTokenRequired = !!authRequestList.find(
+        const isAuthenticatedPath = !!authRequestList.find(
           (obj) => obj.method === request.method && obj.url === request.url
         );
+
+        // add to summary log
+        requestLogger.summary.isAuthenticatedPath = isAuthenticatedPath;
 
         // The smaug configuration, fetched and validated
         const configuration = await smaug.fetch({
           token,
-          authTokenRequired,
+          isAuthenticatedPath,
         });
 
-        const isAuthToken = !!configuration.user?.uniqueId;
+        // add to summary log
+        requestLogger.summary.agencyId = configuration.agencyId;
+        requestLogger.summary.clientId = configuration.app.clientId;
+
+        const isAuthenticatedToken = !!configuration.user?.uniqueId;
+
+        // add to summary log
+        requestLogger.summary.isAuthenticatedToken = isAuthenticatedToken;
 
         let municipalityAgencyId = null;
-        if (isAuthToken && authTokenRequired) {
+        if (isAuthenticatedToken) {
           // get municipalityAgencyId from /userinfo
           municipalityAgencyId = await userinfo.fetch({ token });
         }
+
+        // add to summary log
+        requestLogger.summary.municipalityAgencyId = municipalityAgencyId;
 
         // Select agencyId
         const agencyId = municipalityAgencyId || configuration.agencyId;
@@ -158,7 +169,7 @@ module.exports = async function (fastify, opts) {
         let proxyResponse;
 
         try {
-          const cardNumber = authTokenRequired
+          const cardNumber = isAuthenticatedPath
             ? configuration.user?.uniqueId || null
             : null;
 
@@ -192,5 +203,16 @@ module.exports = async function (fastify, opts) {
           );
       }
     },
+  });
+
+  fastify.addHook("onResponse", (request, reply, done) => {
+    request.requestLogger.info("TRACK", {
+      status: reply.statusCode,
+      method: request.method,
+      url: request.url,
+      ...request.requestLogger.summary,
+      total_ms: Date.now() - summary.total_ms,
+    });
+    done();
   });
 };

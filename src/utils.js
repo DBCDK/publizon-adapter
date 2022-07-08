@@ -43,7 +43,7 @@ async function fetcher(url, options, log) {
       ? await res.json()
       : await res.text();
 
-  log.info(
+  log.debug(
     `External HTTP request: ${(options && options.method) || "GET"} ${url} ${
       res.status
     }`,
@@ -82,7 +82,7 @@ function getCredentials({ agencyId, log }) {
   const credentials = credentialsList?.[agencyId];
 
   if (!credentials?.licenseKey || !credentials?.retailerId) {
-    log.info(`Agency '${agencyId}' is missing Publizon credentials`);
+    log.debug(`Agency '${agencyId}' is missing Publizon credentials`);
     throw {
       code: 403,
       body: {
