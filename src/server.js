@@ -206,11 +206,12 @@ module.exports = async function (fastify, opts) {
   });
 
   fastify.addHook("onResponse", (request, reply, done) => {
+    const summary = request.requestLogger.summary;
     request.requestLogger.info("TRACK", {
       status: reply.statusCode,
       method: request.method,
       url: request.url,
-      ...request.requestLogger.summary,
+      ...summary,
       total_ms: Date.now() - summary.total_ms,
     });
     done();
