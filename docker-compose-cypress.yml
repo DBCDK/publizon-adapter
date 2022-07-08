@@ -11,14 +11,22 @@ services:
     environment:
       - FASTIFY_LOG_LEVEL=silent
       - FASTIFY_PRETTY_LOGS=false
-      - SMAUG_URL=http://http_mock:3000/smaug/configuration
+      - CORS_ORIGIN=all
+
       - PUBLIZON_URL=http://http_mock:3000/publizon
       - PUBLIZON_CLIENT_ID=some-clientId
+      - SMAUG_URL=http://http_mock:3000/smaug/configuration
       - USERINFO_URL=http://http_mock:3000/userinfo
-      - AUTH_URL=http://http_mock:3000/auth
-      - CLIENT_ID=some-client-id
-      - CLIENT_SECRET=some-client-secret
-      - CORS_ORIGIN=all
+
+      - |
+        PUBLIZON_CREDENTIALS=
+        000001,some-licenseKey,some-retailerId
+        000002,some-licenseKey,some-retailerId
+        000003,
+        000004,some-licenseKey
+        000005,,some-retailerId,
+        ${VALID_PUBLIZON_CREDENTIALS}
+
     depends_on:
       - http_mock
   e2e:

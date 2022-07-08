@@ -10,7 +10,7 @@ const initUserinfo = require("./clients/userinfo");
 const initProxy = require("./clients/proxy");
 
 const initLogger = require("./logger");
-const { nanoToMs } = require("./utils");
+const { nanoToMs, getCredentials } = require("./utils");
 
 // JSON Schema for validating the request headers
 const schema = {
@@ -135,7 +135,7 @@ module.exports = async function (fastify, opts) {
         );
 
         // The smaug configuration, fetched and validated
-        const configuration = await smaug.fetchConfiguration({
+        const configuration = await smaug.fetch({
           token,
           authTokenRequired,
         });
@@ -148,10 +148,11 @@ module.exports = async function (fastify, opts) {
           municipalityAgencyId = await userinfo.fetch({ token });
         }
 
+        // Select agencyId
         const agencyId = municipalityAgencyId || configuration.agencyId;
 
-        // The smaug configuration, fetched and validated
-        const credentials = await smaug.fetchCredentials({ agencyId });
+        // fetch credentials for agencyId/MunicipalityAgencyId
+        const credentials = getCredentials({ agencyId, log });
 
         // Holds the proxy response
         let proxyResponse;
@@ -191,10 +192,5 @@ module.exports = async function (fastify, opts) {
           );
       }
     },
-  });
-
-  fastify.addHook("onResponse", (request, reply, done) => {
-    // Some code
-    done();
   });
 };
