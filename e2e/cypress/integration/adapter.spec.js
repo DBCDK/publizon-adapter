@@ -6,28 +6,9 @@ const validSmaugUser = {
   uniqueId: "some-uniqueId",
 };
 
-const validPublizonCredentials = {
-  retailerId: "some-retialerId",
-  licenseKey: "some-licenseKey",
-};
-
 const validSmaugConfiguration = {
   agencyId: "000001",
-  app: { clientId: "some-client-id" },
-};
-
-const validSmaugCredentialsList = {
-  "000001": validPublizonCredentials,
-  "000002": validPublizonCredentials,
-  "000003": validPublizonCredentials,
-  "000004": validPublizonCredentials,
-};
-
-const validSmaugPublizonCredentials = {
-  publizon: {
-    clientId: "some-clientId",
-    credentials: validSmaugCredentialsList,
-  },
+  app: { clientId: "some-clientId" },
 };
 
 describe("Testing the publizon adapter", () => {
@@ -144,52 +125,49 @@ describe("Testing the publizon adapter", () => {
        * 2. smaug configuration fails to validate
        */
 
-      // Setup mocks
-      mockSmaug({
-        token: "VALID_TOKEN",
-        status: 200,
-        body: {
-          ...validSmaugConfiguration,
-        },
-      });
-
       // Credentials smaug configuration mocks
       mockSmaug({
         token: "TOKEN_WITHOUT_PUBLIZON_CREDENTIALS",
         status: 200,
-        body: {},
+        body: {
+          ...validSmaugConfiguration,
+          agencyId: "000003",
+        },
       });
       mockSmaug({
-        token: "TOKEN_WITHOUT_PUBLIZON_CLIENTID",
+        token: "TOKEN_WITHOUT_PUBLIZON_RETAILERID",
         status: 200,
-        body: omit("clientId", validSmaugPublizonCredentials),
+        body: {
+          ...validSmaugConfiguration,
+          agencyId: "000004",
+        },
       });
       mockSmaug({
         token: "TOKEN_WITHOUT_PUBLIZON_LICENSEKEY",
         status: 200,
-        body: omit("licenseKey", validSmaugPublizonCredentials),
+        body: {
+          ...validSmaugConfiguration,
+          agencyId: "000005",
+        },
       });
 
       // For each token we send request to adapter
       // expecting to fail smaug configuration validation
       [
         "TOKEN_WITHOUT_PUBLIZON_CREDENTIALS",
-        "TOKEN_WITHOUT_PUBLIZON_CLIENTID",
+        "TOKEN_WITHOUT_PUBLIZON_RETAILERID",
         "TOKEN_WITHOUT_PUBLIZON_LICENSEKEY",
       ].forEach((token) => {
-        // get anonymous token
-        mockFetchAuthSucces({ token });
-
         cy.request({
           url: `/v1/some/path`,
           headers: {
-            Authorization: `Bearer VALID_TOKEN`,
+            Authorization: `Bearer ${token}`,
           },
           failOnStatusCode: false,
         }).then((res) => {
           expect(res.status).to.eq(403);
           expect(res.body).to.deep.include({
-            message: "token must have publizon credentials with 'licenseKey'",
+            message: "Agency is missing Publizon credentials",
           });
         });
       });
@@ -212,7 +190,6 @@ describe("Testing the publizon adapter", () => {
         },
       });
 
-      mockFetchCredentials();
       mockFetchPublizonAnonymousPathGetSucces();
 
       // Send request to adapter
@@ -245,7 +222,6 @@ describe("Testing the publizon adapter", () => {
         },
       });
 
-      mockFetchCredentials();
       mockFetchPublizonAnonymousPathPostSucces();
 
       // Send request to adapter
@@ -318,8 +294,6 @@ describe("Testing the publizon adapter", () => {
         },
       });
 
-      mockFetchCredentials();
-
       mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces();
 
       // Send request to adapter
@@ -354,7 +328,6 @@ describe("Testing the publizon adapter", () => {
       });
 
       mockFetchUserinfoSucces();
-      mockFetchCredentials();
       mockFetchPublizonAuthenticatedPathGetSucces();
 
       // Send request to adapter
@@ -389,14 +362,7 @@ describe("Testing the publizon adapter", () => {
       });
 
       mockFetchUserinfoSucces();
-      mockFetchCredentials();
       mockFetchPublizonAuthenticatedPathPOSTSucces();
-
-      mockSmaug({
-        token: "SOME_ANONYMOUS_TOKEN",
-        status: 200,
-        body: validSmaugPublizonCredentials,
-      });
 
       // Send request to adapter
       cy.request({
@@ -447,48 +413,6 @@ function mockSmaug({ token, status, body }) {
     response: {
       status,
       body,
-    },
-  });
-}
-
-function mockFetchCredentials({ token } = {}) {
-  if (!token) {
-    token = "SOME_ANONYMOUS_TOKEN";
-  }
-  // get Anonymous token from smaug auth
-  mockFetchAuthSucces({ token });
-
-  // add credentialsList to smaug
-  mockSmaug({
-    token,
-    status: 200,
-    body: validSmaugPublizonCredentials,
-  });
-}
-
-function mockFetchAuthSucces({ token = "SOME_ANONYMOUS_TOKEN" }) {
-  mockHTTP({
-    request: {
-      method: "POST",
-      path: `/auth/oauth/token`,
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-      },
-      body: {
-        grant_type: "password",
-        username: "@",
-        password: "@",
-        client_id: "some-client-id",
-        client_secret: "some-client-secret",
-      },
-    },
-    response: {
-      status: 200,
-      body: {
-        access_token: token,
-        token_type: "Bearer",
-        expires_in: 2591999,
-      },
     },
   });
 }

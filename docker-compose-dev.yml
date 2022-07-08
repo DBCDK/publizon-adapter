@@ -17,21 +17,25 @@ services:
       - FASTIFY_PRETTY_LOGS=false
       - CORS_ORIGIN=all
 
-      # - SMAUG_URL=http://http_mock:3000/smaug/configuration
-      # - PUBLIZON_URL=http://http_mock:3000/publizon
-      # - PUBLIZON_CLIENT_ID=some-clientId
-      # - USERINFO_URL=http://http_mock:3000/userinfo
-      # - AUTH_URL=http://http_mock:3000/auth
-      # - CLIENT_ID=some-client-id
-      # - CLIENT_SECRET=some-client-secret
+      - PUBLIZON_URL=http://http_mock:3000/publizon
+      - PUBLIZON_CLIENT_ID=some-clientId
+      - SMAUG_URL=http://http_mock:3000/smaug/configuration
+      - USERINFO_URL=http://http_mock:3000/userinfo
 
-      - SMAUG_URL=https://auth-config.dbc.dk/configuration
-      - PUBLIZON_URL=https://library-api.qa.pubhub.dk
-      - PUBLIZON_CLIENT_ID=2F5FC38C-C9B0-4AA6-9987-F4A8B34B7D1C
-      - USERINFO_URL=https://login.bib.dk/userinfo
-      - AUTH_URL=https://login.bib.dk
-      - CLIENT_ID=8d9a9b9a-2719-4678-9c4f-0356f02a7bc6
-      - CLIENT_SECRET=e1b561f7791d6195c44d844a5f999be3c63a22fad61fd835be020f6bc23e0d8e
+      # - PUBLIZON_URL=https://library-api.qa.pubhub.dk
+      # - PUBLIZON_CLIENT_ID=2F5FC38C-C9B0-4AA6-9987-F4A8B34B7D1C
+      # - SMAUG_URL=https://auth-config.dbc.dk/configuration
+      # - USERINFO_URL=https://login.bib.dk/userinfo
+
+      - |
+        PUBLIZON_CREDENTIALS=
+        000001,some-licenseKey,some-retailerId
+        000002,some-licenseKey,some-retailerId
+        000003,
+        000004,some-licenseKey
+        000005,,some-retailerId,
+        ${VALID_PUBLIZON_CREDENTIALS}
+
     ports:
       - "3000:3000"
     volumes:
