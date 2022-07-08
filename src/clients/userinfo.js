@@ -5,7 +5,7 @@ const { fetcher } = require("../utils");
  */
 function validateMunicipalityAgencyId({ attributes, log, token }) {
   if (!(attributes && attributes.municipalityAgencyId)) {
-    log.info(
+    log.debug(
       `MunicipalityAgencyId request to userinfo failed for token=${token}. Client is missing configuration`
     );
     throw {
@@ -23,11 +23,19 @@ function init({ log }) {
    * The actual fetch function
    */
   async function fetch({ token }) {
+    const time = Date.now();
+
     const res = await fetcher(
       `${process.env.USERINFO_URL}`,
       { headers: { authorization: `Bearer ${token}` } },
       log
     );
+
+    // log response to summary
+    log.summary.datasources.userinfo = {
+      code: res.code,
+      time: Date.now() - time,
+    };
 
     switch (res.code) {
       case 200:
