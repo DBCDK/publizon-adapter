@@ -16,7 +16,7 @@
   "dependencies": {
     "@fastify/cors": "^7.0.0",
     "@fastify/formbody": "^6.0.1",
-    "dbc-node-logger": "^2.0.9",
+    "dbc-node-logger": "^2.0.10",
     "fastify": "^3.18.0",
     "fastify-cli": "^2.13.0",
     "https-proxy-agent": "^5.0.0",
