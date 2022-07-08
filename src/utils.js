@@ -79,8 +79,6 @@ function parseCredentials(str = "") {
 const credentialsList = parseCredentials(process.env.PUBLIZON_CREDENTIALS);
 
 function getCredentials({ agencyId, log }) {
-  console.log("vvvvvvvvvvvvvvvvvv", process.env.PUBLIZON_CREDENTIALS);
-
   const credentials = credentialsList?.[agencyId];
 
   if (!credentials?.licenseKey || !credentials?.retailerId) {
