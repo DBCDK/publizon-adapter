@@ -24,9 +24,6 @@ Requests with a authenticated token from the adapter ro the PubHub api will in a
 
 CardNumber will contain a users `uniqueId`.
 
-
-
-
 ## Request parameters
 
 When using the adapter, the header should be replaced with a DÅP token and PUBLIZON_HOST should be replaced with the adapter host:
@@ -37,7 +34,16 @@ When using the adapter, the header should be replaced with a DÅP token and PUBL
 
 Here are a couple of examples on how to call the adapter:
 
-List of requests requiring CPR to be attached to the body:
+Anonymous token on a anonymous path
+`curl -H "Authorization: bearer {TOKEN}" -H "Content-Type: application/json" -X GET {PUBLIZON_HOST}/v1/library/profile`
+
+Authenticated token on a authenticated path
+`curl -H "Authorization: bearer {AUTHENTICATED_TOKEN}" -H "Content-Type: application/json" -X GET {PUBLIZON_HOST}/v1/user/loans`
+
+Anonymous token on a authenticated path (will return error message from PubHup)
+`curl -H "Authorization: bearer {TOKEN}" -H "Content-Type: application/json" -X GET {PUBLIZON_HOST}/v1/user/loans`
+
+List of requests requiring _cardNumber_ to be set in header:
 
 | Method | Path                         |
 | ------ | -----------------------------|
