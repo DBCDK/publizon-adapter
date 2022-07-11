@@ -62,7 +62,7 @@ And for cypress test purpose:
 
 ## Custom responses from the Adapter
 
-For the most of the time the adapter will pass raw responses from the FBS CMS API back to the caller. In some circumstances however, the adapter itself return error messages:
+For the most of the time the adapter will pass raw responses from the PubHub API back to the caller. In some circumstances however, the adapter itself return error messages:
 | Description | Request | Response Body | Response Status Code |
 |-------------|---------|---------------|----------------------|
 | Missing authorization header |`curl "{PUBLIZON_HOST}/v1/some/path"`| `{"message":"headers should have required property 'authorization'"}`| 400 |
