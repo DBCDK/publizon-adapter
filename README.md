@@ -34,13 +34,16 @@ When using the adapter, the header should be replaced with a DÅP token and PUBL
 
 Here are a couple of examples on how to call the adapter:
 
-Anonymous token on a anonymous path
+Anonymous token on a anonymous path:
+
 `curl -H "Authorization: bearer {TOKEN}" -H "Content-Type: application/json" -X GET {PUBLIZON_HOST}/v1/library/profile`
 
-Authenticated token on a authenticated path
+Authenticated token on a authenticated path:
+
 `curl -H "Authorization: bearer {AUTHENTICATED_TOKEN}" -H "Content-Type: application/json" -X GET {PUBLIZON_HOST}/v1/user/loans`
 
-Anonymous token on a authenticated path (will return error message from PubHup)
+Anonymous token on a authenticated path (This will return error message from PubHup):
+
 `curl -H "Authorization: bearer {TOKEN}" -H "Content-Type: application/json" -X GET {PUBLIZON_HOST}/v1/user/loans`
 
 List of requests requiring _cardNumber_ to be set in header:
