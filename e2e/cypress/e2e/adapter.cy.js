@@ -379,6 +379,40 @@ describe("Testing the publizon adapter", () => {
         });
       });
     });
+
+    it("Access Publizon API with authenticated token on a dynamic route", () => {
+      /**
+       * Expected flow:
+       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+       */
+
+      // Setup mocks
+      mockSmaug({
+        token: "AUTHENTICATED_TOKEN",
+        status: 200,
+        body: {
+          ...validSmaugConfiguration,
+          user: validSmaugUser,
+        },
+      });
+
+      mockFetchUserinfoSucces();
+      mockFetchPublizonDynamicPathGETSucces();
+
+      // Send request to adapter
+      cy.request({
+        url: "/v1/some/authenticated/path/ISBN",
+        headers: {
+          Authorization: "Bearer AUTHENTICATED_TOKEN",
+        },
+        failOnStatusCode: false,
+      }).then((res) => {
+        expect(res.status).to.eq(200);
+        expect(res.body).to.deep.include({
+          message: "Hello from Publizon",
+        });
+      });
+    });
   });
 });
 
@@ -542,6 +576,24 @@ function mockFetchPublizonAuthenticatedPathAnonymousTokenGetSucces() {
     response: {
       status: 403,
       body: { message: "Some error from Pubub for missing cardNumber" },
+    },
+  });
+}
+
+function mockFetchPublizonDynamicPathGETSucces() {
+  mockHTTP({
+    request: {
+      path: "/publizon/v1/some/authenticated/path/ISBN",
+      headers: {
+        clientid: "some-clientId",
+        // licensekey: "some-licenseKey",
+        licensekey: "d4383a9fa7214a6d78a019c1328695a3",
+        cardnumber: "some-uniqueId",
+      },
+    },
+    response: {
+      status: 200,
+      body: { message: "Hello from Publizon" },
     },
   });
 }

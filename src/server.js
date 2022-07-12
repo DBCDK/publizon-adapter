@@ -129,7 +129,8 @@ module.exports = async function (fastify, opts) {
 
         // Check if request requires a authenticated token by matching request url and method
         const isAuthenticatedPath = !!authRequestList.find(
-          (obj) => obj.method === request.method && obj.url === request.url
+          (obj) =>
+            obj.method === request.method && request.url.startsWith(obj.url)
         );
 
         // add to summary log
