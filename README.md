@@ -35,7 +35,7 @@ When the dev environment is started, run tests with `npm run cy:open`.
 
 ## Using the adapter
 
-The adapter must be called with a DÅP token associated with a client that is configured with a agencyId. In this way the adapter is able to fetch the proper credentials used to access the publizon API.
+The adapter must be called with a DÅP token associated with a client that is configured with a agencyId. In this way the adapter is able to fetch the proper credentials used to access the PubHub API.
 
 - The adapter requires the DÅP token to be given as authorization bearer header.
 
@@ -49,15 +49,17 @@ Credentials is fetched by the configured agencyId in the smaug configuration.
 
 ### Accessing authenticated data
 
-Most of the endpoints in  the PubHub API requires a authenticated token `Authorization: Bearer {AUTHENTICATED_TOKEN}`.
+Most of the endpoints in the PubHub API requires a authenticated token `Authorization: Bearer {AUTHENTICATED_TOKEN}`.
 
-Requests with a authenticated token from the adapter ro the PubHub api will in addition to the `clientId` and `licenseKey` credentials, also include a `cardNumber` in the header. 
+Requests with a authenticated token from the adapter to the PubHub api will in addition to the `clientId` and `licenseKey` credentials, also include a `cardNumber` in the header. 
 
 CardNumber will contain a users `uniqueId`.
 
 ## Request parameters
 
-When using the adapter, the header should be replaced with a DÅP token and PUBLIZON_HOST should be replaced with the adapter host:
+When using the adapter, the header should be replaced with a DÅP token and 
+
+_HOST_ should be replaced with the adapter host:
 
 `curl -H "Authorization: Bearer {TOKEN}" "{PUBLIZON_HOST}/{PATH}"`
 
