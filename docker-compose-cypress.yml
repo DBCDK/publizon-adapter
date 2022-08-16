@@ -9,6 +9,7 @@ services:
   adapter:
     image: "${IMAGE}"
     environment:
+      - APP_NAME=Adapter
       - FASTIFY_LOG_LEVEL=silent
       - FASTIFY_PRETTY_LOGS=false
       - CORS_ORIGIN=all

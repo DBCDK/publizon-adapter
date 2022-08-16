@@ -10,7 +10,7 @@ const initUserinfo = require("./clients/userinfo");
 const initProxy = require("./clients/proxy");
 
 const initLogger = require("./logger");
-const { nanoToMs, getCredentials } = require("./utils");
+const { getCredentials } = require("./utils");
 
 // JSON Schema for validating the request headers
 const schema = {
@@ -188,7 +188,6 @@ module.exports = async function (fastify, opts) {
       } catch (error) {
         if (!error.code) {
           // This is an unexpected error, could be a bug
-          // request.log.error(error);
           log.error(String(error), {
             error: String(error),
             stacktrace: error.stack,

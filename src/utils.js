@@ -1,5 +1,5 @@
-// const fetch = require("node-fetch");
 const fetch = require("isomorphic-unfetch");
+const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 /**
  * Wraps fetch API
@@ -34,7 +34,7 @@ async function fetcher(url, options, log) {
 
     throw {
       code: 500,
-      body: "internal server error",
+      body: { message: "internal server error", appName: APP_NAME },
     };
   }
   const contentType = res.headers.get("content-Type");
@@ -87,6 +87,7 @@ function getCredentials({ agencyId, log }) {
       code: 403,
       body: {
         message: "Agency is missing Publizon credentials",
+        appName: APP_NAME,
       },
     };
   }
