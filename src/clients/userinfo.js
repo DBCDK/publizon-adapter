@@ -1,4 +1,5 @@
 const { fetcher } = require("../utils");
+const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 /**
  * Checks that attributes contains a municipalityAgencyId
@@ -10,7 +11,10 @@ function validateMunicipalityAgencyId({ attributes, log, token }) {
     );
     throw {
       code: 403,
-      body: { message: "token client does not include a municipalityAgencyId" },
+      body: {
+        message: "token client does not include a municipalityAgencyId",
+        appName: APP_NAME,
+      },
     };
   }
 }
@@ -51,7 +55,7 @@ function init({ log }) {
         );
         throw {
           code: 500,
-          body: { message: "internal server error" },
+          body: { message: "internal server error", appName: APP_NAME },
         };
     }
   }

@@ -1,4 +1,5 @@
 const { fetcher } = require("../utils");
+const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 let = ANONYMOUS_TOKEN = null;
 
@@ -31,6 +32,7 @@ function validateSmaugConfiguration({ configuration, log }) {
       code: 403,
       body: {
         message: "Token client has missing configuration 'agencyId'",
+        appName: APP_NAME,
       },
     };
   }
@@ -76,12 +78,12 @@ function init({ log }) {
       case 404:
         throw {
           code: 403,
-          body: { message: "invalid token" },
+          body: { message: "invalid token", appName: APP_NAME },
         };
       default:
         throw {
           code: 500,
-          body: { message: "internal server error" },
+          body: { message: "internal server error", appName: APP_NAME },
         };
     }
   }
