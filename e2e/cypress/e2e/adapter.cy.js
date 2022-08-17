@@ -314,7 +314,9 @@ describe("Testing the publizon adapter", () => {
     it("GET: Fetch credentials for authenticated token (credentials by municipalityAgencyId)", () => {
       /**
        * Expected flow:
-       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+       * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
+       * 2. smaug configuration is succesfully validated
+       * 3. PubHub adapter will return response successfully
        */
 
       // Setup mocks
@@ -348,7 +350,10 @@ describe("Testing the publizon adapter", () => {
     it("POST: Fetch credentials for authenticated token (credentials by municipalityAgencyId)", () => {
       /**
        * Expected flow:
-       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+       * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
+       * 2. smaug configuration is succesfully validated
+       * 4. userinfo returns the users municipalityAgencyId
+       * 3. PubHub adapter will return response successfully
        */
 
       // Setup mocks
@@ -383,7 +388,10 @@ describe("Testing the publizon adapter", () => {
     it("Access Publizon API with authenticated token on a dynamic route", () => {
       /**
        * Expected flow:
-       * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+       * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
+       * 2. smaug configuration is succesfully validated
+       * 3. userinfo returns the users municipalityAgencyId
+       * 4. PubHub adapter will return response successfully
        */
 
       // Setup mocks
@@ -421,7 +429,11 @@ describe("Testing the publizon adapter", () => {
       it("Access Publizon API with authenticated token", () => {
         /**
          * Expected flow:
-         * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+         * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
+         * 2. smaug configuration is succesfully validated
+         * 3. userinfo returns the users municipalityAgencyId
+         * 4. optional path is allowed for authenticated token
+         * 5. PubHub adapter will return response successfully
          */
 
         // Setup mocks
@@ -455,7 +467,11 @@ describe("Testing the publizon adapter", () => {
       it("Access Publizon API with anonymous token", () => {
         /**
          * Expected flow:
-         * 1. Adapter uses token to fetch smaug configuration, but token is invalid
+         * 1. Adapter uses token to fetch smaug configuration containing publizon credentials
+         * 2. smaug configuration is succesfully validated
+         * 3. userinfo returns the users municipalityAgencyId
+         * 4. optional path is allowed for anonymous token
+         * 5. PubHub adapter will return response successfully
          */
 
         // Setup mocks
