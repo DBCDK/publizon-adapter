@@ -39,7 +39,7 @@ function parseCorsOrigin() {
 }
 
 // list of requests which requires cardNumber to be attached
-const authRequestList = [
+const authRequiredRequestList = [
   { method: "GET", url: "/v1/user/loans" },
   { method: "GET", url: "/v1/user/loans/" },
   { method: "POST", url: "/v1/user/loans/" },
@@ -54,6 +54,15 @@ const authRequestList = [
   // for test only
   { method: "GET", url: "/v1/some/authenticated/path" },
   { method: "POST", url: "/v1/some/authenticated/path" },
+];
+
+// list of requests where cardNumber is optional
+const authOptionalRequestList = [
+  { method: "GET", url: "/v1/loanstatus/" },
+  { method: "POST", url: "/v1/loanstatus" },
+  // for test only
+  { method: "GET", url: "/v1/some/optional/path/" },
+  { method: "POST", url: "/v1/some/optional/path" },
 ];
 
 /**
@@ -128,13 +137,20 @@ module.exports = async function (fastify, opts) {
         const token = request.headers.authorization.replace(/bearer /i, "");
 
         // Check if request requires a authenticated token by matching request url and method
-        const isAuthenticatedPath = !!authRequestList.find(
+        const isAuthenticatedPath = !!authRequiredRequestList.find(
+          (obj) =>
+            obj.method === request.method && request.url.startsWith(obj.url)
+        );
+
+        // Check if authenticated token is optional for the request by matching request url and method
+        const isOptionalPath = !!authOptionalRequestList.find(
           (obj) =>
             obj.method === request.method && request.url.startsWith(obj.url)
         );
 
         // add to summary log
         requestLogger.summary.isAuthenticatedPath = isAuthenticatedPath;
+        requestLogger.summary.isOptionalPath = isOptionalPath;
 
         // The smaug configuration, fetched and validated
         const configuration = await smaug.fetch({
@@ -170,9 +186,12 @@ module.exports = async function (fastify, opts) {
         let proxyResponse;
 
         try {
-          const cardNumber = isAuthenticatedPath
-            ? configuration.user?.uniqueId || null
-            : null;
+          let cardNumber = null;
+          const uniqueId = configuration.user?.uniqueId;
+          // Authenticated path
+          if (uniqueId && (isAuthenticatedPath || isOptionalPath)) {
+            cardNumber = uniqueId;
+          }
 
           proxyResponse = await proxy.fetch({
             licenseKey: credentials.licenseKey,

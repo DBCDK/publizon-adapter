@@ -18,17 +18,19 @@ services:
       - FASTIFY_PRETTY_LOGS=false
       - CORS_ORIGIN=all
 
-      # - PUBLIZON_URL=http://http_mock:3000/publizon
-      # - PUBLIZON_CLIENT_ID=some-clientId
-      # - SMAUG_URL=http://http_mock:3000/smaug/configuration
-      # - USERINFO_URL=http://http_mock:3000/userinfo
+      ### locale
+      - PUBLIZON_URL=http://http_mock:3000/publizon
+      - PUBLIZON_CLIENT_ID=some-clientId
+      - SMAUG_URL=http://http_mock:3000/smaug/configuration
+      - USERINFO_URL=http://http_mock:3000/userinfo
 
-      - PUBLIZON_URL=https://library-api.qa.pubhub.dk
+      #### remote
+      # - PUBLIZON_URL=https://library-api.qa.pubhub.dk
       # - PUBLIZON_URL=https://library-api.pubhub.dk
 
-      - PUBLIZON_CLIENT_ID=${PUBLIZON_CLIENT_ID}
-      - SMAUG_URL=https://auth-config.dbc.dk/configuration
-      - USERINFO_URL=https://login.bib.dk/userinfo
+      # - PUBLIZON_CLIENT_ID=${PUBLIZON_CLIENT_ID}
+      # - SMAUG_URL=https://auth-config.dbc.dk/configuration
+      # - USERINFO_URL=https://login.bib.dk/userinfo
 
       - |
         PUBLIZON_CREDENTIALS=
