@@ -95,12 +95,21 @@ List of requests requiring _cardNumber_ to be set in header:
 | DELETE | /v1/user/checklist/          |
 | GET    | /v1/user/cardnumber/friendly |
 
+List of requests where _cardNumber_ is optional to be set in header:
+
+| Method | Path                         |
+| ------ | -----------------------------|
+| GET    | /v1/loanstatus/              | 
+| POST   | /v1/loanstatus               |
+
 And for cypress test purpose:
 
 | Method | Path                         |
 | ------ | -----------------------------|
 | GET    | /v1/some/authenticated/path  | 
 | POST   | /v1/some/authenticated/path  |
+| GET    | /v1/some/optional/path/      | 
+| POST   | /v1/some/optional/path       |
 
 ## Custom responses from the Adapter
 
