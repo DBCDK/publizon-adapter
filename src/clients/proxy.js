@@ -1,7 +1,5 @@
 const HttpsProxyAgent = require("https-proxy-agent");
 
-const md5 = require("md5");
-
 const { fetcher } = require("../utils");
 
 /**
@@ -20,7 +18,7 @@ function init({ url, method, headers, body, log }) {
       headers: {
         ...headers,
         clientId,
-        licenseKey: md5(licenseKey),
+        licenseKey,
       },
     };
 

@@ -21,10 +21,10 @@ services:
 
       - |
         PUBLIZON_CREDENTIALS=
-        000001,some-licenseKey,some-retailerId
-        000002,some-licenseKey,some-retailerId
+        000001,d4383a9fa7214a6d78a019c1328695a3,some-retailerId
+        000002,d4383a9fa7214a6d78a019c1328695a3,some-retailerId
         000003,
-        000004,some-licenseKey
+        000004,d4383a9fa7214a6d78a019c1328695a3
         000005,,some-retailerId,
         ${VALID_PUBLIZON_CREDENTIALS}
 
