@@ -10,7 +10,7 @@ const initUserinfo = require("./clients/userinfo");
 const initProxy = require("./clients/proxy");
 
 const initLogger = require("./logger");
-const { getCredentials } = require("./utils");
+const { getCredentials, ensureString } = require("./utils");
 
 // JSON Schema for validating the request headers
 const schema = {
@@ -224,7 +224,28 @@ module.exports = async function (fastify, opts) {
     },
   });
 
+  fastify.addHook("onSend", function (_request, reply, payload, next) {
+    // save response body for logging in "onResponse"
+    reply.raw.payload = payload;
+    next();
+  });
+
   fastify.addHook("onResponse", (request, reply, done) => {
+    // payload debug track
+    request.requestLogger.debug("DEBUG", {
+      requestObj: {
+        method: request.method,
+        url: request.url,
+        body: ensureString(request.body),
+        headers: request.headers,
+        hostname: request.hostname,
+      },
+      response: {
+        status: reply.statusCode,
+        body: ensureString(reply.raw?.payload),
+      },
+    });
+
     const summary = request.requestLogger.summary;
     request.requestLogger.info("TRACK", {
       status: reply.statusCode,
