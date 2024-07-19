@@ -1,5 +1,4 @@
-const HttpsProxyAgent = require("https-proxy-agent");
-
+const { ProxyAgent } = require("undici");
 const { fetcher } = require("../utils");
 
 /**
@@ -27,7 +26,7 @@ function init({ url, method, headers, body, log }) {
     }
 
     if (process.env.HTTPS_PROXY) {
-      options.agent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
+      options.dispatcher = new ProxyAgent({ uri: process.env.HTTPS_PROXY });
     }
 
     delete options.headers.host;

@@ -24,6 +24,7 @@
     "isomorphic-unfetch": "^3.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
+    "undici": "5.20.0",
     "uuid": "^8.3.2"
   }
 }

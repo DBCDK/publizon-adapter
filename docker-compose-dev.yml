@@ -29,6 +29,7 @@ services:
       - PUBLIZON_CLIENT_ID=${PUBLIZON_CLIENT_ID}
       - SMAUG_URL=https://auth-config.dbc.dk/configuration
       - USERINFO_URL=https://login.bib.dk/userinfo
+      - HTTPS_PROXY=http://dmzproxy.dbc.dk:3128
 
       #### staging
        # - PUBLIZON_URL=https://library-api.qa.pubhub.dk

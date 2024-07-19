@@ -1,4 +1,4 @@
-const fetch = require("isomorphic-unfetch");
+const { fetch } = require("undici");
 const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 /**
