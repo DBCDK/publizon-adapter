@@ -12,6 +12,11 @@ const initProxy = require("./clients/proxy");
 const initLogger = require("./logger");
 const { getCredentials, ensureString } = require("./utils");
 
+const { startResourceMonitor } = require("./utils");
+
+// Will start resource monitoring
+startResourceMonitor();
+
 // JSON Schema for validating the request headers
 const schema = {
   headers: {
