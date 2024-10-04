@@ -1,6 +1,9 @@
 const { fetch } = require("undici");
 const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
+const { log: _log } = require("dbc-node-logger");
+const { cpuUsage, memoryUsage } = require("process");
+
 /**
  * Wraps fetch API
  * Adds some error handling as well as logging
@@ -106,9 +109,44 @@ function ensureString(el) {
   return isString ? el : JSON.stringify(el);
 }
 
+/**
+ * Logs CPU and memory usage in an interval
+ */
+const INTERVAL_MS = 10000;
+
+let previousCpuUsage = cpuUsage();
+let previousTime = performance.now();
+
+function startResourceMonitor() {
+  setInterval(() => {
+    const currentTime = performance.now();
+    let duration = currentTime - previousTime;
+
+    const currentCpuUsage = cpuUsage();
+
+    // Calculating CPU load for the duration
+    const user =
+      (currentCpuUsage.user - previousCpuUsage.user) / 1000 / duration;
+    const system =
+      (currentCpuUsage.system - previousCpuUsage.system) / 1000 / duration;
+
+    // Set current to previous
+    previousCpuUsage = currentCpuUsage;
+    previousTime = currentTime;
+
+    _log.info("RESOURCE_MONITOR", {
+      diagnostics: {
+        cpuUsage: { user, system },
+        memoryUsage: memoryUsage(),
+      },
+    });
+  }, INTERVAL_MS);
+}
+
 module.exports = {
   fetcher,
   nanoToMs,
   getCredentials,
   ensureString,
+  startResourceMonitor,
 };
