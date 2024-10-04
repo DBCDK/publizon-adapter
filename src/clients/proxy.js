@@ -3,11 +3,14 @@ const { fetcher } = require("../utils");
 
 const TIMEOUT = 60000;
 
-const dispatcher = new ProxyAgent({
-  uri: process.env.HTTPS_PROXY,
-  bodyTimeout: TIMEOUT,
-  headersTimeout: TIMEOUT,
-});
+let dispatcher = null;
+if (process.env.HTTPS_PROXY) {
+  dispatcher = new ProxyAgent({
+    uri: process.env.HTTPS_PROXY,
+    bodyTimeout: TIMEOUT,
+    headersTimeout: TIMEOUT,
+  });
+}
 
 /**
  * Initializes the proxy
@@ -33,7 +36,7 @@ function init({ url, method, headers, body, log }) {
       options.headers.cardNumber = cardNumber;
     }
 
-    if (process.env.HTTPS_PROXY) {
+    if (dispatcher) {
       options.dispatcher = dispatcher;
     }
 
