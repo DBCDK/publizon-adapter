@@ -237,19 +237,19 @@ module.exports = async function (fastify, opts) {
 
   fastify.addHook("onResponse", (request, reply, done) => {
     // payload debug track
-    request.requestLogger.debug("DEBUG", {
-      requestObj: {
-        method: request.method,
-        url: request.url,
-        body: ensureString(request.body),
-        headers: request.headers,
-        hostname: request.hostname,
-      },
-      response: {
-        status: reply.statusCode,
-        body: ensureString(reply.raw?.payload),
-      },
-    });
+    // request.requestLogger.debug("DEBUG", {
+    //   requestObj: {
+    //     method: request.method,
+    //     url: request.url,
+    //     body: ensureString(request.body),
+    //     headers: request.headers,
+    //     hostname: request.hostname,
+    //   },
+    //   response: {
+    //     status: reply.statusCode,
+    //     body: ensureString(reply.raw?.payload),
+    //   },
+    // });
 
     const summary = request.requestLogger.summary;
     request.requestLogger.info("TRACK", {
