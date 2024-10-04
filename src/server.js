@@ -259,6 +259,11 @@ module.exports = async function (fastify, opts) {
       ...summary,
       total_ms: Date.now() - summary.total_ms,
     });
+
+    // Cleanup request logger
+    request.requestLogger = null;
+    request.timings = null;
+
     done();
   });
 };
