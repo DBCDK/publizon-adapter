@@ -47,7 +47,12 @@ function init({ url, method, headers, body, log }) {
       options.body = typeof body === "object" ? JSON.stringify(body) : body;
     }
 
-    let res = await fetcher(process.env.PUBLIZON_URL + url, options, log);
+    let res = await fetcher(
+      process.env.PUBLIZON_URL + url,
+      options,
+      log,
+      true // Set streaming to true as these responses may be several hundreds of MBs
+    );
 
     // log response to summary
     log.summary.datasources.pubhub = {

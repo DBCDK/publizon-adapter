@@ -3,12 +3,13 @@ const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 const { log: _log } = require("dbc-node-logger");
 const { cpuUsage, memoryUsage } = require("process");
+const { pipeline } = require("stream");
 
 /**
  * Wraps fetch API
  * Adds some error handling as well as logging
  */
-async function fetcher(url, options, log) {
+async function fetcher(url, options, log, stream = false) {
   const start = process.hrtime();
   let res;
   try {
@@ -40,22 +41,51 @@ async function fetcher(url, options, log) {
       body: { message: "internal server error", appName: APP_NAME },
     };
   }
-  const contentType = res.headers.get("content-Type");
-  const body =
-    contentType && contentType.includes("json")
-      ? await res.json()
-      : await res.text();
 
-  log.debug(
-    `External HTTP request: ${(options && options.method) || "GET"} ${url} ${
-      res.status
-    }`,
-    { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
-  );
+  let body;
+  let pipeline;
+  if (stream) {
+    return pipeline(res.body, reply.raw, (err) => {
+      const timings = { ms: nanoToMs(process.hrtime(start)[1]) };
+
+      if (err) {
+        log.error(
+          `External HTTP request: ${res.method || "GET"} ${url} FETCH ERROR`,
+          {
+            error: String(err),
+            stacktrace: err.stack,
+            timings,
+          }
+        );
+        reply.send(err); // Send fejlen til klienten
+      } else {
+        log.debug(
+          `External HTTP request: ${
+            (options && options.method) || "GET"
+          } ${url} ${res.status}`,
+          { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
+        );
+      }
+    });
+  } else {
+    const contentType = res.headers.get("content-Type");
+    body =
+      contentType && contentType.includes("json")
+        ? await res.json()
+        : await res.text();
+
+    log.debug(
+      `External HTTP request: ${(options && options.method) || "GET"} ${url} ${
+        res.status
+      }`,
+      { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
+    );
+  }
 
   return {
     code: res.status,
     body,
+    pipeline,
   };
 }
 

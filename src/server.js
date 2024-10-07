@@ -207,8 +207,10 @@ module.exports = async function (fastify, opts) {
           throw e;
         }
 
+        return proxyResponse.pipeline;
+
         // Finally send the proxied response to the caller
-        reply.code(proxyResponse.code).send(await proxyResponse.body);
+        // reply.code(proxyResponse.code).send(await proxyResponse.body);
       } catch (error) {
         if (!error.code) {
           // This is an unexpected error, could be a bug
@@ -229,11 +231,11 @@ module.exports = async function (fastify, opts) {
     },
   });
 
-  fastify.addHook("onSend", function (_request, reply, payload, next) {
-    // save response body for logging in "onResponse"
-    reply.raw.payload = payload;
-    next();
-  });
+  // fastify.addHook("onSend", function (_request, reply, payload, next) {
+  //   // save response body for logging in "onResponse"
+  //   // reply.raw.payload = payload;
+  //   next();
+  // });
 
   fastify.addHook("onResponse", (request, reply, done) => {
     // payload debug track
