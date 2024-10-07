@@ -1,4 +1,4 @@
-const { fetch } = require("undici");
+const fetch = require("node-fetch");
 const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 const { log: _log } = require("dbc-node-logger");
