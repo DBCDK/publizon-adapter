@@ -45,28 +45,32 @@ async function fetcher(url, options, log, stream = false) {
   let body;
   let bodyPipeline;
   if (stream) {
-    bodyPipeline = pipeline(res.body, reply.raw, (err) => {
-      const timings = { ms: nanoToMs(process.hrtime(start)[1]) };
+    bodyPipeline = function pipelineWrapper(reply) {
+      return pipeline(res.body, reply.raw, (err) => {
+        const timings = { ms: nanoToMs(process.hrtime(start)[1]) };
 
-      if (err) {
-        log.error(
-          `External HTTP request: ${res.method || "GET"} ${url} FETCH ERROR`,
-          {
-            error: String(err),
-            stacktrace: err.stack,
-            timings,
-          }
-        );
-        reply.send(err); // Send fejlen til klienten
-      } else {
-        log.debug(
-          `External HTTP request: ${
-            (options && options.method) || "GET"
-          } ${url} ${res.status}`,
-          { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
-        );
-      }
-    });
+        if (err) {
+          log.error(
+            `External HTTP request: ${
+              options.method || "GET"
+            } ${url} FETCH ERROR`,
+            {
+              error: String(err),
+              stacktrace: err.stack,
+              timings,
+            }
+          );
+          reply.send(err); // Send fejlen til klienten
+        } else {
+          log.debug(
+            `External HTTP request: ${
+              (options && options.method) || "GET"
+            } ${url} ${res.status}`,
+            { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
+          );
+        }
+      });
+    };
   } else {
     const contentType = res.headers.get("content-Type");
     body =

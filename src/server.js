@@ -207,7 +207,7 @@ module.exports = async function (fastify, opts) {
           throw e;
         }
 
-        return proxyResponse.pipeline;
+        return proxyResponse.pipeline(reply);
 
         // Finally send the proxied response to the caller
         // reply.code(proxyResponse.code).send(await proxyResponse.body);
