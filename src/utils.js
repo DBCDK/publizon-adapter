@@ -66,7 +66,7 @@ async function fetcher(url, options, log, stream = false) {
             `External HTTP request: ${
               (options && options.method) || "GET"
             } ${url} ${res.status}`,
-            { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
+            { timings }
           );
         }
       });
