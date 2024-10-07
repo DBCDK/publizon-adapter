@@ -3,7 +3,7 @@ const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 const { log: _log } = require("dbc-node-logger");
 const { cpuUsage, memoryUsage } = require("process");
-const { pipeline } = require("stream");
+const { Readable } = require("stream");
 
 /**
  * Wraps fetch API
@@ -43,8 +43,21 @@ async function fetcher(url, options, log, stream = false) {
   }
 
   let body;
+  let bodyStream;
   if (stream) {
-    body = res.body;
+    const reader = res?.body?.getReader();
+    bodyStream = new Readable({
+      async read() {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            this.push(null);
+            break;
+          }
+          this.push(value);
+        }
+      },
+    });
   } else {
     const contentType = res.headers.get("content-Type");
     body =
@@ -63,7 +76,7 @@ async function fetcher(url, options, log, stream = false) {
   return {
     code: res.status,
     body,
-    pipeline: bodyPipeline,
+    stream: bodyStream,
   };
 }
 

@@ -206,11 +206,11 @@ module.exports = async function (fastify, opts) {
           // Give up, and pass the error to the caller
           throw e;
         }
+
         reply.code(proxyResponse.code);
-        reply.send(proxyResponse.body);
 
         // Finally send the proxied response to the caller
-        // reply.code(proxyResponse.code).send(await proxyResponse.body);
+        proxyResponse.stream.pipe(reply.raw);
       } catch (error) {
         if (!error.code) {
           // This is an unexpected error, could be a bug
