@@ -29,10 +29,6 @@ function init({ url, method, headers, body, log }) {
       options.headers.cardNumber = cardNumber;
     }
 
-    if (dispatcher) {
-      options.dispatcher = dispatcher;
-    }
-
     delete options.headers.host;
     delete options.headers.authorization;
 
