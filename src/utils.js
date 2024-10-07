@@ -43,48 +43,22 @@ async function fetcher(url, options, log, stream = false) {
   }
 
   let body;
-  let bodyPipeline;
   if (stream) {
-    bodyPipeline = function pipelineWrapper(reply) {
-      return pipeline(res.body, reply.raw, (err) => {
-        const timings = { ms: nanoToMs(process.hrtime(start)[1]) };
-
-        if (err) {
-          log.error(
-            `External HTTP request: ${
-              options.method || "GET"
-            } ${url} FETCH ERROR`,
-            {
-              error: String(err),
-              stacktrace: err.stack,
-              timings,
-            }
-          );
-          reply.send(err); // Send fejlen til klienten
-        } else {
-          log.debug(
-            `External HTTP request: ${
-              (options && options.method) || "GET"
-            } ${url} ${res.status}`,
-            { timings }
-          );
-        }
-      });
-    };
+    body = res.body;
   } else {
     const contentType = res.headers.get("content-Type");
     body =
       contentType && contentType.includes("json")
         ? await res.json()
         : await res.text();
-
-    log.debug(
-      `External HTTP request: ${(options && options.method) || "GET"} ${url} ${
-        res.status
-      }`,
-      { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
-    );
   }
+
+  log.debug(
+    `External HTTP request: ${(options && options.method) || "GET"} ${url} ${
+      res.status
+    }`,
+    { timings: { ms: stream ? 0 : nanoToMs(process.hrtime(start)[1]) } }
+  );
 
   return {
     code: res.status,
