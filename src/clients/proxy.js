@@ -1,16 +1,5 @@
-const { ProxyAgent } = require("undici");
+const HttpsProxyAgent = require("https-proxy-agent");
 const { fetcher } = require("../utils");
-
-const TIMEOUT = 60000;
-
-let dispatcher = null;
-if (process.env.HTTPS_PROXY) {
-  dispatcher = new ProxyAgent({
-    uri: process.env.HTTPS_PROXY,
-    bodyTimeout: TIMEOUT,
-    headersTimeout: TIMEOUT,
-  });
-}
 
 /**
  * Initializes the proxy
@@ -31,6 +20,10 @@ function init({ url, method, headers, body, log }) {
         licenseKey,
       },
     };
+
+    if (process.env.HTTPS_PROXY) {
+      options.agent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
+    }
 
     if (cardNumber) {
       options.headers.cardNumber = cardNumber;
