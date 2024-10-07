@@ -8,7 +8,7 @@ const { cpuUsage, memoryUsage } = require("process");
  * Wraps fetch API
  * Adds some error handling as well as logging
  */
-async function fetcher(url, options, log) {
+async function fetcher(url, options, log, stream = false) {
   const start = process.hrtime();
   let res;
   try {
@@ -40,21 +40,28 @@ async function fetcher(url, options, log) {
       body: { message: "internal server error", appName: APP_NAME },
     };
   }
-  const contentType = res.headers.get("content-Type");
-  const body =
-    contentType && contentType.includes("json")
-      ? await res.json()
-      : await res.text();
+
+  let body = res.body;
+
+  if (!stream) {
+    const contentType = res.headers.get("content-Type");
+
+    body =
+      contentType && contentType.includes("json")
+        ? await res.json()
+        : await res.text();
+  }
 
   log.debug(
     `External HTTP request: ${(options && options.method) || "GET"} ${url} ${
       res.status
     }`,
-    { timings: { ms: nanoToMs(process.hrtime(start)[1]) } }
+    { timings: { ms: nanoToMs(process.hrtime(start)[1]), stream } }
   );
 
   return {
     code: res.status,
+    headers: res.headers,
     body,
   };
 }
