@@ -43,9 +43,9 @@ async function fetcher(url, options, log, stream = false) {
   }
 
   let body;
-  let pipeline;
+  let bodyPipeline;
   if (stream) {
-    return pipeline(res.body, reply.raw, (err) => {
+    bodyPipeline = pipeline(res.body, reply.raw, (err) => {
       const timings = { ms: nanoToMs(process.hrtime(start)[1]) };
 
       if (err) {
@@ -85,7 +85,7 @@ async function fetcher(url, options, log, stream = false) {
   return {
     code: res.status,
     body,
-    pipeline,
+    pipeline: bodyPipeline,
   };
 }
 
