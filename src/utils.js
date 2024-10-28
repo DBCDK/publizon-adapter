@@ -3,7 +3,6 @@ const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 const { log: _log } = require("dbc-node-logger");
 const { cpuUsage, memoryUsage } = require("process");
-const { AbortController } = require("abort-controller");
 
 const timeout = 120000; // 120s
 /**
