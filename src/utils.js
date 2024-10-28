@@ -3,14 +3,19 @@ const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 const { log: _log } = require("dbc-node-logger");
 const { cpuUsage, memoryUsage } = require("process");
+const { AbortController } = require("abort-controller");
 
+const timeout = 120000; // 120s
 /**
  * Wraps fetch API
  * Adds some error handling as well as logging
  */
-async function fetcher(url, options, log, stream = false) {
+async function fetcher(url, options = {}, log, stream = false) {
   const start = process.hrtime();
   let res;
+  const controller = new AbortController();
+  options.signal = controller.signal;
+  const timer = setTimeout(() => controller.abort(), timeout);
   try {
     log.debug(
       `Creating external HTTP request: ${
@@ -23,6 +28,19 @@ async function fetcher(url, options, log, stream = false) {
     );
 
     res = await fetch(url, options);
+
+    res?.body.on?.("close", () => {
+      // Clear timeout timer when socket is closed
+      clearTimeout(timer);
+    });
+    res?.body.on?.("end", () => {
+      // Clear timeout timer when stream is ended
+      clearTimeout(timer);
+    });
+    res?.body.on?.("error", () => {
+      controller.abort(); // Abort if there is an error in streaming
+      clearTimeout(timer);
+    });
   } catch (e) {
     log.error(
       `External HTTP request: ${
