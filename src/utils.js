@@ -4,7 +4,7 @@ const APP_NAME = process.env.APP_NAME || "DBC adapter";
 const { log: _log } = require("dbc-node-logger");
 const { cpuUsage, memoryUsage } = require("process");
 
-const timeout = 120000; // 120s
+const timeout = 5 * 60 * 1000; // 5min
 /**
  * Wraps fetch API
  * Adds some error handling as well as logging
@@ -14,7 +14,12 @@ async function fetcher(url, options = {}, log, stream = false) {
   let res;
   const controller = new AbortController();
   options.signal = controller.signal;
-  const timer = setTimeout(() => controller.abort(), timeout);
+
+  const timer = setTimeout(() => {
+    log.error(`HTTP request timeout: ${url}`);
+    controller.abort();
+  }, timeout);
+
   try {
     log.debug(
       `Creating external HTTP request: ${
