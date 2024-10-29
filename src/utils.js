@@ -34,10 +34,12 @@ async function fetcher(url, options = {}, log, stream = false) {
     res = await fetch(url, options);
 
     res?.body.on?.("close", () => {
+      log.debug(`HTTP request close: ${url}`);
       // Clear timeout timer when socket is closed
       clearTimeout(timer);
     });
     res?.body.on?.("end", () => {
+      log.debug(`HTTP request end: ${url}`);
       // Clear timeout timer when stream is ended
       clearTimeout(timer);
     });
