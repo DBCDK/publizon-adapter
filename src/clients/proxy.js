@@ -1,6 +1,15 @@
 const HttpsProxyAgent = require("https-proxy-agent");
 const { fetcher } = require("../utils");
 
+const agent = new HttpsProxyAgent({
+  keepAlive: true, // Hold forbindelser åbne for genbrug
+  keepAliveMsecs: 1000, // Holder forbindelser åbne i 1 sekund før de lukkes
+  maxSockets: 50, // Maksimalt antal samtidige sockets
+  maxFreeSockets: 10, // Maksimalt antal inaktive sockets, der holdes åbne
+  timeout: 5000, // Lukker inaktive sockets efter 5 sekunder
+  proxy: process.env.HTTPS_PROXY,
+});
+
 /**
  * Initializes the proxy
  */
@@ -22,7 +31,7 @@ function init({ url, method, headers, body, log }) {
     };
 
     if (process.env.HTTPS_PROXY) {
-      options.agent = new HttpsProxyAgent(process.env.HTTPS_PROXY);
+      options.agent = agent;
     }
 
     if (cardNumber) {
