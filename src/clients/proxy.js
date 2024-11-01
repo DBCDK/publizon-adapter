@@ -7,7 +7,10 @@ const agent = new HttpsProxyAgent({
   maxSockets: 50, // Maksimalt antal samtidige sockets
   maxFreeSockets: 10, // Maksimalt antal inaktive sockets, der holdes åbne
   timeout: 5000, // Lukker inaktive sockets efter 5 sekunder
-  proxy: process.env.HTTPS_PROXY,
+
+  host: "dmzproxy.dbc.dk", // Proxyens værtsnavn
+  port: 3128, // Proxyens port
+  protocol: "http:",
 });
 
 /**
