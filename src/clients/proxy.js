@@ -2,7 +2,7 @@ const HttpsProxyAgent = require("https-proxy-agent");
 const { fetcher } = require("../utils");
 
 const agent = new HttpsProxyAgent({
-  keepAlive: true, // Hold forbindelser åbne for genbrug
+  keepAlive: false, // true may cause sockets no to close
   keepAliveMsecs: 1000, // Holder forbindelser åbne i 1 sekund før de lukkes
   maxSockets: 50, // Maksimalt antal samtidige sockets
   maxFreeSockets: 10, // Maksimalt antal inaktive sockets, der holdes åbne
