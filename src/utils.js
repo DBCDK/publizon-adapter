@@ -1,4 +1,4 @@
-const fetch = import("node-fetch");
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const APP_NAME = process.env.APP_NAME || "DBC adapter";
 
 const { log: _log } = require("dbc-node-logger");
