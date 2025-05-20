@@ -17,6 +17,9 @@ pipeline {
     }
     triggers{
         githubPush()
+        upstream(
+          upstreamProjects: env.BRANCH_NAME == "main" ? 'Docker-base-node-bump-trigger' : ''
+        )        
     }
     stages {
         stage('Build image') {
