@@ -14,6 +14,12 @@ pipeline {
         IMAGE = "${imageName}${env.BRANCH_NAME != 'main' ? "-${env.BRANCH_NAME.toLowerCase()}" : ''}:${imageLabel}"
         DOCKER_COMPOSE_NAME = "compose-${IMAGE}"
         GITLAB_PRIVATE_TOKEN = credentials('metascrum-gitlab-api-token')
+
+        SONAR_SCANNER_HOME = tool 'SonarQube Scanner from Maven Central'
+        SONAR_SCANNER = "$SONAR_SCANNER_HOME/bin/sonar-scanner"
+        SONAR_PROJECT_KEY = "publizon-adapter"
+        SONAR_SOURCES='./'
+        SONAR_TESTS='./'
     }
     triggers{
         githubPush()
@@ -22,6 +28,31 @@ pipeline {
         )        
     }
     stages {
+        stage("SonarQube") {
+            steps {
+                withSonarQubeEnv(installationName: 'sonarqube.dbc.dk') {
+                    script {
+                        // trigger sonarqube analysis
+                        def sonarOptions = "-Dsonar.branch.name=$BRANCH_NAME"
+                        if (env.BRANCH_NAME != 'main') {
+                            sonarOptions += " -Dsonar.newCode.referenceBranch=main"
+                        }
+
+                        sh returnStatus: true, script: """
+                        $SONAR_SCANNER $sonarOptions -Dsonar.token=${SONAR_AUTH_TOKEN} -Dsonar.projectKey="${SONAR_PROJECT_KEY}"
+                        """
+                    }
+                }
+            }
+        }
+        stage("Quality gate") {
+            steps {
+                // wait for analysis results
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
         stage('Build image') {
             steps { script {
                     // Work around bug https://issues.jenkins-ci.org/browse/JENKINS-44609 , https://issues.jenkins-ci.org/browse/JENKINS-44789
