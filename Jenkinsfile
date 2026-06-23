@@ -1,8 +1,26 @@
 #!groovy​
 
+@Library('dependency-track') _
+
 def app
 def imageName = 'publizon-adapter'
 def imageLabel = BUILD_NUMBER
+
+def DT_TEAM_NAME = "febib"
+def DT_PROJECT_TYPE = "javascript"
+def OUTPUT_FOLDER = "./dependency-track-folder"
+def SBOM_TYPE = "application"
+def DT_PROJECTS = [
+    [folder: "."]
+].collect { project ->
+    [
+        folder: project.folder,
+        sbomType: project.sbomType ?: SBOM_TYPE,
+        teamName: project.teamName ?: DT_TEAM_NAME,
+        projectType: project.projectType ?: DT_PROJECT_TYPE,
+        outputFolder: project.outputFolder ?: OUTPUT_FOLDER
+    ]
+}
 
 pipeline {
     agent {
@@ -22,6 +40,33 @@ pipeline {
         )        
     }
     stages {
+        stage("Supply-chain gate") {
+            agent {
+                docker {
+                    label 'devel10'
+                    image "docker-dbc.artifacts.dbccloud.dk/dbc-node:node25"
+                    alwaysPull true
+                }
+            }
+            steps {
+                script {
+                    for (def project : DT_PROJECTS) {
+                        dir(project.folder) {
+                            generateSbomNpm(
+                                sbomType: project.sbomType,
+                                outputFolder: project.outputFolder
+                            )
+                            dependencyTrackGate(
+                                projectBom: "${project.outputFolder}/sbom.json",
+                                projectTeam: project.teamName,
+                                projectType: project.projectType,
+                                *:(fileExists("${project.outputFolder}/vex.json") ? [projectVex: "${project.outputFolder}/vex.json"] : [:])
+                            )
+                        }
+                    }
+                }
+            }
+        }
         stage('Build image') {
             steps { script {
                     // Work around bug https://issues.jenkins-ci.org/browse/JENKINS-44609 , https://issues.jenkins-ci.org/browse/JENKINS-44789
